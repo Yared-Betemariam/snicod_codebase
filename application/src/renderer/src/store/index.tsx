@@ -1,7 +1,35 @@
 import { getAllSnippetsFromDB } from '@renderer/db'
-import { filterSnippets as filterSnippetsByInput } from '@renderer/utils'
-import { Code, Snippet } from '@shared/index'
+import {
+  filterSnippets as filterSnippetsByInput,
+  updateDatabaseSettingsData
+} from '@renderer/utils'
+import { Code, Snippet, Theme } from '@shared/index'
 import { create } from 'zustand'
+
+// app settings
+interface SettingsStore {
+  fontSize: number
+  setFontSize: (fontSize: number) => void
+  theme: Theme | undefined
+  loadTheme: () => Promise<void>
+  setTheme: (theme: Theme) => void
+}
+
+export const useSettings = create<SettingsStore>((set) => ({
+  fontSize: 14,
+  setFontSize: (fontSize) => {
+    set({ fontSize })
+    updateDatabaseSettingsData()
+  },
+  theme: undefined,
+  setTheme: (theme) => set({ theme }),
+  loadTheme: async () => {
+    const res = await window.app.getCurrentTheme()
+    set({
+      theme: res
+    })
+  }
+}))
 
 // snippet
 interface SinppetStore {
@@ -47,6 +75,11 @@ interface ModalsStore {
   setShowDeleteModal: (value: boolean) => void
   showNewModal: boolean
   setShowNewModal: (value: boolean) => void
+  showSearchPopover: boolean
+  setShowSearchPopover: (value: boolean) => void
+  showSettingsModal: boolean
+  license?: boolean
+  setShowSettingsModal: (value: boolean, license?: boolean) => void
 }
 
 export const useModals = create<ModalsStore>((set) => ({
@@ -55,7 +88,11 @@ export const useModals = create<ModalsStore>((set) => ({
   showDeleteModal: false,
   setShowDeleteModal: (value) => set({ showDeleteModal: value }),
   showNewModal: false,
-  setShowNewModal: (value) => set({ showNewModal: value })
+  setShowNewModal: (value) => set({ showNewModal: value }),
+  showSearchPopover: false,
+  setShowSearchPopover: (value) => set({ showSearchPopover: value }),
+  showSettingsModal: false,
+  setShowSettingsModal: (value, license) => set({ showSettingsModal: value, license })
 }))
 
 // sidebar
@@ -74,7 +111,7 @@ export const useSidebar = create<SidebarStore>((set, get) => ({
   sidebarWidth: 250,
   setSidebarWidth: (newWidth) => {
     set({ sidebarWidth: newWidth })
-    localStorage.setItem('sidebarWidth', JSON.stringify(newWidth))
+    updateDatabaseSettingsData()
   },
   filterInput: '',
   isFiltering: false,
@@ -85,7 +122,8 @@ export const useSidebar = create<SidebarStore>((set, get) => ({
   },
   setSidebarOpen: (sidebarOpen) => {
     set({ sidebarOpen })
-    localStorage.setItem('sidebarOpen', JSON.stringify(sidebarOpen))
+    useSidebar.getState().setSidebarWidth(250)
+    updateDatabaseSettingsData()
   },
   filterSnippets: (snippets) => {
     const filterInput = get().filterInput

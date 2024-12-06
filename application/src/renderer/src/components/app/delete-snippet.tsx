@@ -1,8 +1,9 @@
 import { deleteSnippetFromDb } from '@renderer/db'
 import { useModals, useSnippet, useSnippets } from '@renderer/store'
+import { AlertCircle } from 'lucide-react'
 import { useState } from 'react'
 import { ModalWrapper } from '../ui/ModelWrapper'
-import Button from '../ui/button'
+import Button, { OutlinedButton } from '../ui/button'
 import { DialogClose } from '../ui/dialog'
 
 const DeleteSnippet = () => {
@@ -28,23 +29,30 @@ const DeleteSnippet = () => {
     <ModalWrapper
       open={showDeleteModal}
       onOpen={setShowDeleteModal}
-      className="p-3.5 max-w-[20rem]"
+      className="max-w-[28rem]"
       noTrigger
+      simple
       headerDesc={`Are you sure you want to permanently delete "${snippet.title}"?`}
       headerLabel={`Delete ${snippet.type}`}
       trigger={<></>}
     >
-      <div className="flex w-full gap-4">
+      {snippet.type == 'folder' && (
+        <span className="text-sm">
+          <AlertCircle className="size-[13px] inline mr-0.5 alert-color" /> Note that when deleting
+          a folder all its children will be deleteded as well
+        </span>
+      )}
+      <div className="flex w-full justify-end gap-3">
+        <DialogClose asChild>
+          <OutlinedButton className="h-8">Cancel</OutlinedButton>
+        </DialogClose>
         <Button
           disabled={loading}
-          className="flex-[2] h-8 bg-red-600 hover:bg-red-600/80"
+          className="h-8 bg-red-600 dark:bg-red-500 hover:bg-red-600/80 dark:hover:bg-red-500/80"
           onClick={handleDelete}
         >
           Delete
         </Button>
-        <DialogClose asChild>
-          <Button className=" h-8 flex-1">Cancel</Button>
-        </DialogClose>
       </div>
     </ModalWrapper>
   )

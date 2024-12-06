@@ -22,7 +22,7 @@ const Footer = () => {
           </span>
         </div>
         <div className="flex flex-col gap-1 items-center md:items-end md:ml-auto">
-          <p className="text-base font-extrabold opacity-80 mb-3">LINKS</p>
+          <p className="text-base font-extrabold opacity-40 mb-3">LINKS</p>
           <div className="flex flex-col items-center md:items-end gap-3">
             {navigationLinks.map((item) => (
               <Link
@@ -38,7 +38,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="flex flex-col gap-2 items-center md:items-end">
-          <p className="text-base font-extrabold opacity-80 mb-1">LEGAL</p>
+          <p className="text-base font-extrabold opacity-40 mb-1">LEGAL</p>
           <Link href={"/terms"}>
             <Button
               variant={"link"}

@@ -1,21 +1,20 @@
-import folderIcon from '@/assets/folder.svg'
-import fileIcon from '@/assets/snippet.svg'
 import { addSnippetToDB } from '@renderer/db'
 import { useAppSearch, useModals, useSnippets } from '@renderer/store'
 import { cn } from '@renderer/utils'
 import { Snippet } from '@shared/index'
 import { useState, useTransition } from 'react'
-import { IconType } from 'react-icons'
 import { BsPlusLg } from 'react-icons/bs'
-import { IoFolderOutline } from 'react-icons/io5'
-import { PiCodeLight } from 'react-icons/pi'
 import { v4 as uuid } from 'uuid'
-import Button from '../ui/button'
+import Button, { OutlinedButton } from '../ui/button'
 import { DialogClose } from '../ui/dialog'
+import { Dropdown } from '../ui/dropdown'
 import Input from '../ui/input'
 import { ModalWrapper } from '../ui/ModelWrapper'
 
+import { BsTextLeft } from 'react-icons/bs'
 type FileType = 'file' | 'folder'
+
+import { BiCollection } from 'react-icons/bi'
 
 const NewSnippetModal = ({ left }: { left?: boolean }) => {
   const [createFileType, setCreateFileType] = useState<FileType>('file')
@@ -35,31 +34,21 @@ const NewSnippetModal = ({ left }: { left?: boolean }) => {
   const [title, setTitle] = useState('')
   const [isPending, startTransistion] = useTransition()
 
-  const createFileTypeList: {
-    type: FileType
-    Icon: IconType
-    img: string
-  }[] = [
-    {
-      type: 'file',
-      Icon: PiCodeLight,
-      img: fileIcon
-    },
-    {
-      type: 'folder',
-      Icon: IoFolderOutline,
-      img: folderIcon
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      onCreate()
     }
-  ]
+  }
 
   const onCreate = () => {
     const snippet: Snippet = {
       id: uuid(),
       title,
-      type: createFileType
+      type: createFileType,
+      lang: 'text'
     }
     startTransistion(() => {
-      addSnippetToDB(snippet, useSnippets.getState().snippets!, parentId!, 'text').then(() => {
+      addSnippetToDB(snippet, useSnippets.getState().snippets!, parentId!).then(() => {
         if (parentId) {
           setExpanded({
             ...expanded,
@@ -75,81 +64,66 @@ const NewSnippetModal = ({ left }: { left?: boolean }) => {
 
   return (
     <ModalWrapper
-      headerLabel="CREATE"
-      // headerDesc="Create a snicod snippet/folder"
+      headerLabel="Create"
+      headerDesc="Create new snicod snippet or collection."
       open={showNewModal}
       onOpen={setShowNewModal}
+      simple
       trigger={
         <span
           onClick={() => setSnippet(undefined)}
           className={cn(
-            'size-14 grid place-content-center shadow-lg shadow-zinc-950/25 rounded-full bottom-6 bg-[#2a2a2a] border border-zinc-300/10 z-50 absolute  hover:bg-zinc-800 cursor-pointer',
+            'size-14 grid place-content-center shadow-lg shadow-neutral-950/5 dark:shadow-neutral-950/5 rounded-full bottom-6 bg-[#e1e1e1] dark:bg-[#2a2a2a] border border-neutral-600/10 dark:border-neutral-300/10 z-50 absolute  hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer',
             left ? 'left-6' : 'right-6'
           )}
         >
           <BsPlusLg className="size-6" />
         </span>
       }
-      className="w-full p-6 max-w-[20rem] bg-[#212121]/0"
+      className="w-full max-w-[32rem]"
     >
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1 mb-2">
-          <span className="text-sm font-medium text-zinc-300">Snippet title</span>
-          <Input
-            maxLength={32}
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onClear={() => setTitle('')}
-            autoFocus
-            className="h-[2.25rem]"
-          />
-        </div>
-        <div className="mb-3 flex w-full flex-col gap-2">
-          <span className="text-sm text-zinc-300 font-medium">
-            Choose{' '}
-            <span className="text-[12px] leading-[1.2] max-w-[16rem] mb-1 text-zinc-500">
-              Choose the type here
+      <div className="flex flex-col gap-2">
+        <div className="flex gap-2">
+          <div className="flex flex-1 flex-col gap-1 mb-2">
+            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              Title
             </span>
-          </span>
-
-          <div className="flex flex-col rounded border border-zinc-600/50 bg-zinc-900/25">
-            <span className="bg-zinc-700/25 rounded-t border-b border-color flex text-xs text-zinc-500 px-2 py-0.5">
-              <span className="scale-[2.5] mr-2 text-zinc-300">&#183;</span> Select type
-            </span>
-            <div className="flex p-3 gap-3 justify-center">
-              {createFileTypeList.map((FileType, index) => (
-                <div
-                  key={index}
-                  onClick={() => setCreateFileType(FileType.type)}
-                  className={cn(
-                    'flex w-full border py-1.5 border-color items-center justify- gap-2 hover:opacity-100 opacity-75 cursor-pointer rounded px-2.5',
-                    createFileType === FileType.type
-                      ? 'ring-1 ring-primary/50 bg-primary/20 opacity-100'
-                      : ''
-                  )}
-                >
-                  {/* <FileType.Icon className="size-5 opacity-50" /> */}
-                  <img src={FileType.img} alt="icon" width={14} />
-                  <span className="capitalize text-sm font-medium">
-                    {FileType.type == 'file' ? 'snippet' : 'collection'}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <Input
+              onKeyDown={handleKeyDown}
+              maxLength={32}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onClear={() => setTitle('')}
+              placeholder="Your title here"
+              autoFocus
+              inputClassName="bg-neutral-200/50 dark:bg-neutral-900/50 rounded h-10 border-transparent"
+            />
+          </div>
+          <div className="flex flex-col gap-1 mb-2">
+            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Type</span>
+            <Dropdown
+              width={160}
+              className="h-10"
+              value={createFileType}
+              setValue={(value) => setCreateFileType(value as FileType)}
+              items={[
+                { value: 'file', Icon: BsTextLeft, label: 'Snippet' },
+                { value: 'folder', Icon: BiCollection, label: 'Collection' }
+              ]}
+            />
           </div>
         </div>
-
         <div className="flex justify-end gap-2">
+          <DialogClose asChild>
+            <OutlinedButton>Cancel</OutlinedButton>
+          </DialogClose>
           <Button
             onClick={onCreate}
             disabled={!title || isPending}
-            className="bg-primary/60 hover:bg-primary/40 disabled:hover:bg-primary/60 font-semibold h-8 px-3"
+            className="bg-primary dark:bg-primary dark:hover:bg-primary/80 dark:brightness-90 hover:bg-primary/80 disabled:hover:bg-primary font-semibold justify-start"
           >
             <span>Create</span>
           </Button>
-          <DialogClose asChild>
-            <Button className=" h-8 px-3">Cancel</Button>
-          </DialogClose>
         </div>
       </div>
     </ModalWrapper>

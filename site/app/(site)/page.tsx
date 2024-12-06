@@ -12,8 +12,8 @@ export default function Home() {
       <Features />
       <Use />
       <Services />
-      <FAQ />
       <Pricing />
+      <FAQ />
     </main>
   );
 }

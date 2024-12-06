@@ -1,5 +1,5 @@
 import { PopoverClose } from '@radix-ui/react-popover'
-import { useAppSearch, useSnippet, useSnippets } from '@renderer/store'
+import { useAppSearch, useModals, useSnippet, useSnippets } from '@renderer/store'
 import { loadCodeFromDB } from '@renderer/utils'
 import { Snippet } from '@shared/index'
 import { useEffect, useState } from 'react'
@@ -7,6 +7,7 @@ import { IoIosCode, IoIosSearch } from 'react-icons/io'
 import Input from '../ui/input'
 import PopoverWrapper from '../ui/popover-wrapper'
 import Shortcut from '../ui/shortcut'
+import { Hint } from '../ui/tooltip'
 
 type OperationItem = {
   title: string
@@ -20,6 +21,10 @@ const SearchBar = () => {
   const [filteredList, setFilteredList] = useState<Snippet[]>([])
   const snippets = useSnippets((state) => state.snippets)
   const { setSnippet } = useSnippet()
+  const { showSearchPopover, setShowSearchPopover } = useModals((state) => ({
+    showSearchPopover: state.showSearchPopover,
+    setShowSearchPopover: state.setShowSearchPopover
+  }))
 
   const normalOperationsList = [
     {
@@ -73,20 +78,22 @@ const SearchBar = () => {
   }
   return (
     <PopoverWrapper
-      className="min-w-[28rem] p-0 pb-2 py-2.5 shadow-lg shadow-zinc-950/25 space-y-2 mx-4"
+      open={showSearchPopover}
+      onOpen={(value) => setShowSearchPopover(value)}
+      className="min-w-[36rem] p-0 pb-2 py-2.5 shadow-lg shadow-neutral-500/25 dark:shadow-neutral-950/25 space-y-2 mx-4"
       trigger={
-        <span className="border-l border-color  h-full flex items-center gap-2 text-zinc-400 hover:bg-zinc-700/25 px-3">
-          <IoIosSearch className="size-[20px] " />
-          <span className="text-[14px]">Search</span>
-        </span>
+        <Hint hint="Search,Ctrl+Tab">
+          <span className="border-l-0 border-color  h-full flex items-center justify-center gap-2 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-300/40 dark:hover:bg-neutral-700/50 w-12">
+            <IoIosSearch className="size-[20px]" />
+          </span>
+        </Hint>
       }
     >
       <div className="flex flex-col px-3 border-b-0 border-color">
         <Input
           value={filterInput}
           onChange={(e) => setFilterInput(e.target.value)}
-          onClear={() => setFilterInput('')}
-          className="ring-[1.5px] ring-primary rounded"
+          inputClassName="ring-[2px] ring-primary rounded-[2px] border-transparent"
           placeholder="Search by name (snippets, folders and etc...)"
         />
       </div>
@@ -96,10 +103,10 @@ const SearchBar = () => {
             <PopoverClose
               onClick={operationItem.operationFunction}
               key={`${operationItem.title}${index}`}
-              className="flex w-full gap-2 items-center hover:bg-primary px-4 py-1 text-[12px] rounded-none"
+              className="flex w-full gap-2 items-center hover:bg-primary px-4 py-1 text-[12px] rounded-none hover:text-neutral-100"
             >
               <span className="mr-auto">{operationItem.title}</span>
-              <Shortcut text={operationItem.shortcut} />
+              <Shortcut text={operationItem.shortcut} titleKey={operationItem.title} />
             </PopoverClose>
           ))}
         {filterInput &&
@@ -110,16 +117,17 @@ const SearchBar = () => {
               key={`${item.title}${index}`}
               className="flex w-full gap-2 group/item items-center hover:bg-primary/75 rounded-none px-3 py-1 text-[12px]"
             >
-              <IoIosCode className="size-[17px] text-primary group-hover/item:text-zinc-100" />
-              <span>{item.title}</span>
+              <IoIosCode className="size-[17px] text-primary group-hover/item:text-neutral-100" />
+              <span className="group-hover/item:text-neutral-100">{item.title}</span>
             </PopoverClose>
           ))}
         {filterInput && [...filteredList, ...operationsList].length <= 0 && (
           <PopoverClose
+            key={'noresults'}
             disabled
             className="flex w-full gap-2 group/item items-center rounded px-4 py-0.5 text-[12px]"
           >
-            <span className="text-zinc-600">No matching result</span>
+            <span className="text-neutral-400 dark:text-neutral-600">No matching result</span>
           </PopoverClose>
         )}
       </div>

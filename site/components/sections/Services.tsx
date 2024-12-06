@@ -1,7 +1,7 @@
 // images
-import Image from "next/image";
 import { cn, font2Wrapper } from "@/lib/utils";
-import { Clock8, Frame, Globe, Server, TableOfContents } from "lucide-react";
+import { Clock8, Server, TableOfContents } from "lucide-react";
+import Image from "next/image";
 
 const Services = () => {
   const servicesCards = [
@@ -46,7 +46,7 @@ const Services = () => {
                 className={font2Wrapper(
                   cn(
                     "text-3xl font-extrabold",
-                    index == 0 && "text-4xl md:text-5xl font-black"
+                    index == 0 && "text-4xl md:text-[2.5rem] font-black"
                   )
                 )}
               >
@@ -61,12 +61,6 @@ const Services = () => {
                 {serviceCard.desc}
               </p>
             </div>
-            {/* <serviceCard.Icon
-              className={cn(
-                "size-28 text-primary dsb",
-                index == 0 && "size-52"
-              )}
-            /> */}
             <div className="rounded-md dsb bg-[#1e1e1e] overflow-hidden p-10">
               <div
                 className={cn(
@@ -82,12 +76,6 @@ const Services = () => {
                 />
               </div>
             </div>
-            {/* <span
-              className={cn(
-                "size-[26rem] dsb2 bg-primary/10 rounded-full absolute -right-48 -top-32",
-                index == 0 && "size-[48rem] -right-[24rem] -top-[20rem]"
-              )}
-            /> */}
           </div>
         ))}
       </div>

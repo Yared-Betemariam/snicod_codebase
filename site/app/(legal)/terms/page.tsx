@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import { websiteMail, websiteName } from "@/lib/config";
 import { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Terms of services",
@@ -127,8 +128,11 @@ const page = () => {
 
       <h2>14. Contact Us</h2>
       <p>
-        If you have any questions about these Terms, please contact us at
-        {websiteMail}.
+        If you have any questions about these Terms, please contact us at{" "}
+        <Link href={`mailto:${websiteMail}`} className="underline">
+          {websiteMail}
+        </Link>
+        .
       </p>
     </div>
   );

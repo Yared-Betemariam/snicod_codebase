@@ -10,41 +10,49 @@ export const navigationLinks = [
   },
   {
     title: "Features",
-    link: "#features",
+    link: "/#features",
   },
   {
     title: "Pricing",
-    link: "#pricing",
+    link: "/#pricing",
+  },
+  {
+    title: "Help",
+    link: "/help",
   },
   {
     title: "FAQ",
-    link: "#faq",
+    link: "/#faq",
   },
 ];
 
-const Nav = () => {
+const Nav = ({ simplify }: { simplify?: boolean }) => {
   return (
-    <nav className="flex border-b border-color">
+    <header className="flex">
       <section className="wrapper h-[78px] flex items-center justify-between md:gap-12">
         <Logo />
-        <div className="hidden mr-auto md:flex items-center gap-8">
-          {navigationLinks.map((navLink, index) => (
-            <Link href={navLink.link} key={index} className="">
-              {navLink.title}
+        {!simplify && (
+          <>
+            <nav className="hidden mr-auto md:flex items-center gap-8">
+              {navigationLinks.map((navLink, index) => (
+                <Link href={navLink.link} key={index} className="">
+                  {navLink.title}
+                </Link>
+              ))}
+            </nav>
+            <MobileNav />
+            <Link href={"#pricing"}>
+              <Button
+                variant={"outlined"}
+                className="border-primary/25 hover:bg-primary/5 brightness-75 text-primary hidden sm:flex"
+              >
+                Get Snicod
+              </Button>
             </Link>
-          ))}
-        </div>
-        <MobileNav />
-        <Link href={"#pricing"}>
-          <Button
-            variant={"outlined"}
-            className="border-primary/25 hover:bg-primary/5 brightness-75 text-primary hidden sm:flex"
-          >
-            Get Snicod
-          </Button>
-        </Link>
+          </>
+        )}
       </section>
-    </nav>
+    </header>
   );
 };
 export default Nav;

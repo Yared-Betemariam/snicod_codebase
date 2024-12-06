@@ -15,6 +15,7 @@ import { MouseEventHandler } from 'react'
 interface ModalWrapperProps {
   children?: React.ReactNode
   className?: string
+  noHeader?: boolean
   headerLabel?: string
   simple?: boolean
   headerDesc?: string
@@ -29,6 +30,7 @@ interface ModalWrapperProps {
 export function ModalWrapper({
   children,
   noTrigger,
+  noHeader,
   headerDesc,
   simple,
   open,
@@ -44,24 +46,30 @@ export function ModalWrapper({
   }
   return (
     <Dialog open={open} onOpenChange={onOpen}>
-      {!noTrigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+      {!noTrigger && <DialogTrigger>{trigger}</DialogTrigger>}
       <DialogContent
         simple={simple || false}
-        className={cn('bg-zinc-800/0 rounded border-0 border-zinc-600/25 py-4', className)}
+        className={cn(
+          'bg-neutral-50 p-0 dark:bg-neutral-800 rounded border border-neutral-400/25  dark:border-neutral-600/25 shadow-xl dark:text-zinc-100 text-zinc-900"',
+          className
+        )}
       >
-        <div onClick={handleOnAdd} className="flex flex-col gap-4">
+        <div onClick={handleOnAdd} className="flex w-full h-full flex-col gap-3">
           {headerLabel && (
-            <DialogHeader className="flex flex-col -space-y-0">
-              <DialogTitle className="text-xl">{headerLabel}</DialogTitle>
-              <DialogDescription className="opacity-50">{headerDesc}</DialogDescription>
+            <DialogHeader className={cn('flex  flex-col -space-y-0', noHeader && 'hidden')}>
+              <DialogTitle className="text-lg px-3 py-2.5">{headerLabel}</DialogTitle>
+              <span className="w-full border-b border-neutral-400/25 dark:border-neutral-600/25" />
+              <DialogDescription className="px-3 pt-2 dark:font-light">
+                {headerDesc}
+              </DialogDescription>
             </DialogHeader>
           )}
-          <div className="flex flex-col">{children}</div>
+          <div className={cn('flex flex-col h-full w-full', simple && 'p-3 pt-0')}>{children}</div>
         </div>
         {onClick && closeLabel && (
           <DialogFooter>
             <button
-              className="bg-zinc-700/50 px-3 py-1.5 rounded hover:bg-zinc-700/40 nofocus cursor-pointer"
+              className="bg-neutral-700/50 px-3 py-1.5 rounded hover:bg-neutral-700/40 nofocus cursor-pointer"
               type="submit"
               onClick={onClick}
             >

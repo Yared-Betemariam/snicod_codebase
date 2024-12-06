@@ -1,4 +1,4 @@
-import { Code, Snippet } from '@shared/index'
+import { AppData, Code, Snippet } from '@shared/index'
 import { DBSchema, openDB } from 'idb'
 import { v4 as uuid } from 'uuid'
 
@@ -32,17 +32,12 @@ export async function initDB() {
   return db
 }
 
-export const addSnippetToDB = async (
-  data: Snippet,
-  files: Snippet[],
-  parentId: string,
-  lang: string
-) => {
+export const addSnippetToDB = async (data: Snippet, files: Snippet[], parentId: string) => {
   const db = await initDB()
 
   let codeId: string | undefined
   if (data.type === 'file') {
-    codeId = await addCodeToDB(lang)
+    codeId = await addCodeToDB()
     data = {
       ...data,
       codeId
@@ -165,12 +160,10 @@ const filterChildren = (childrens: Snippet[], id) => {
 // codes CURD
 export const getCodeFromDB = async (id: string) => {
   const db = await initDB()
-  const codes = await db.getAll('codes')
-  console.log(codes)
   return db.get('codes', id)
 }
 
-export const addCodeToDB = async (lang: string): Promise<string> => {
+export const addCodeToDB = async (): Promise<string> => {
   const db = await initDB()
   const codeTx = db.transaction('codes', 'readwrite')
   const codeStore = codeTx.objectStore('codes')
@@ -179,8 +172,7 @@ export const addCodeToDB = async (lang: string): Promise<string> => {
 
   await codeStore.add({
     id: codeId,
-    lang,
-    code: 'シ Copy your code here.'
+    code: ''
   })
 
   await codeTx.done
@@ -188,15 +180,14 @@ export const addCodeToDB = async (lang: string): Promise<string> => {
   return codeId
 }
 
-export const updateCodeInDB = async (id: string, updatedCode: string, lang: string) => {
+export const updateCodeInDB = async (id: string, updatedCode: string) => {
   const db = await initDB()
   const codeTx = db.transaction('codes', 'readwrite')
   const codeStore = codeTx.objectStore('codes')
 
   const updatedCodeSnippet = {
     id,
-    code: updatedCode,
-    lang
+    code: updatedCode
   }
 
   await codeStore.put(updatedCodeSnippet)
@@ -216,48 +207,82 @@ export const deleteCodeFromDB = async (id: string) => {
 
 export const cleanUpOrphanedCodes = async () => {
   const db = await initDB()
-
-  // Get all snippets (including folders and files)
   const snippets = await db.getAll('files')
-
-  // Get all codes (these are what might need cleanup)
   const codes = await db.getAll('codes')
 
-  // Helper function to recursively collect code IDs from snippets and their children
   const collectCodeIdsFromSnippets = (snippets: Snippet[]): Set<string> => {
     const codeIds = new Set<string>()
 
     const collectCodeIds = (snippet: Snippet) => {
-      // If the snippet is a 'file' and has an associated codeId, add it to the set
       if (snippet.type === 'file' && snippet.codeId) {
         codeIds.add(snippet.codeId)
       }
 
-      // If the snippet has children, recursively collect their codeIds as well
       if (snippet.children && snippet.children.length > 0) {
         snippet.children.forEach(collectCodeIds)
       }
     }
 
-    // Start collecting from all top-level snippets
     snippets.forEach(collectCodeIds)
     return codeIds
   }
 
-  // Collect all code IDs that are referenced in the snippets (including nested children)
   const usedCodeIds = collectCodeIdsFromSnippets(snippets)
 
-  // Create a transaction to work on the 'codes' store
   const codeTx = db.transaction('codes', 'readwrite')
   const codeStore = codeTx.objectStore('codes')
 
-  // Iterate over all codes and delete any code that doesn't have a corresponding snippet
   for (const code of codes) {
     if (!usedCodeIds.has(code.id)) {
       await codeStore.delete(code.id)
     }
   }
 
-  // Complete the transaction
   await codeTx.done
+}
+
+// import and export
+export const getDatabaseData = async () => {
+  const db = await initDB()
+  const snippets = await db.getAll('files')
+  const codes = await db.getAll('codes')
+  return {
+    snippets,
+    codes
+  } as AppData
+}
+
+export const setDatabaseData = async (data: string) => {
+  const appData = JSON.parse(data) as AppData
+  if (!appData.snippets || !appData.codes) {
+    return false
+  }
+
+  const db = await initDB()
+
+  const filesTx = db.transaction('files', 'readwrite')
+  const filesStore = filesTx.objectStore('files')
+  await filesStore.clear()
+  await filesTx.done
+
+  const codesTx = db.transaction('codes', 'readwrite')
+  const codesStore = codesTx.objectStore('codes')
+  await codesStore.clear()
+  await codesTx.done
+
+  const addFilesTx = db.transaction('files', 'readwrite')
+  const filesAddStore = addFilesTx.objectStore('files')
+  for (const snippet of appData.snippets) {
+    await filesAddStore.add(snippet)
+  }
+  await addFilesTx.done
+
+  const addCodesTx = db.transaction('codes', 'readwrite')
+  const codesAddStore = addCodesTx.objectStore('codes')
+  for (const code of appData.codes) {
+    await codesAddStore.add(code)
+  }
+  await addCodesTx.done
+
+  return true
 }

@@ -1,8 +1,25 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
-import { GetLicenseKey, SetLicenseKey } from '@shared/index'
-import { app, BrowserWindow, ipcMain, shell } from 'electron'
+import {
+  CheckFreeTrial,
+  ExportAppData,
+  GetLicenseKey,
+  GetSettingsData,
+  ImportAppData,
+  SetLicenseKey,
+  SetSettingsData,
+  StartFreeTrial,
+  Theme
+} from '@shared/index'
+import { app, BrowserWindow, ipcMain, nativeTheme, shell } from 'electron'
+import electronStore from 'electron-store'
 import path, { join } from 'path'
-import { handleGetLicenseKey, handleSetLicenseKey } from './license'
+import {
+  exportAppDataFunc,
+  handleGetSettingsData,
+  handleSetSettingsData,
+  importAppDataFunc
+} from './data'
+import { checkFreeTrial, handleGetLicenseKey, handleSetLicenseKey, startFreeTrial } from './license'
 
 const icon = path.join(__dirname, '..', '..', './build/icon.png')
 const isMac = false
@@ -10,12 +27,12 @@ const isMac = false
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
     title: 'Snicod',
-    maxWidth: 860,
+    maxWidth: 860 + 240,
     maxHeight: 500,
     minWidth: 680,
     minHeight: 400,
     height: 460,
-    width: 760,
+    width: 760 + 240,
     maximizable: false,
     ...(isMac ? { resizable: false } : {}),
     show: false,
@@ -41,19 +58,52 @@ function createWindow(): void {
   mainWindow.setMenu(null)
 
   // frame operations
-  ipcMain.handle('window:minimize', () => {
-    mainWindow.minimize()
-  })
+  if (!ipcMain.eventNames().includes('window:minimize')) {
+    ipcMain.handle('window:minimize', () => {
+      const window = BrowserWindow.getFocusedWindow()
+      if (window) window.minimize()
+    })
+  }
 
-  ipcMain.handle('window:close', () => {
-    app.quit()
-  })
+  if (!ipcMain.eventNames().includes('window:close')) {
+    ipcMain.handle('window:close', () => {
+      app.quit()
+    })
+  }
 
-  ipcMain.handle('app:help', () => {
-    shell.openExternal('https://snicod.pro/documentation')
-  })
+  // links
+  if (!ipcMain.eventNames().includes('app:help')) {
+    ipcMain.handle('app:help', () => {
+      shell.openExternal('https://snicod.pro/help')
+    })
+  }
 
-  // mainWindow.webContents.openDevTools()
+  if (!ipcMain.eventNames().includes('app:website')) {
+    ipcMain.handle('app:website', () => {
+      shell.openExternal('https://snicod.pro')
+    })
+  }
+
+  // theme manager
+  const store = new electronStore()
+  nativeTheme.themeSource = (store.get('theme') as Theme) || 'dark'
+
+  if (!ipcMain.eventNames().includes('theme:toggle')) {
+    ipcMain.handle('theme:toggle', (_, value: Theme) => {
+      const store = new electronStore()
+      nativeTheme.themeSource = value
+      store.set('theme', value)
+    })
+  }
+
+  if (!ipcMain.eventNames().includes('theme:current')) {
+    ipcMain.handle('theme:current', () => {
+      const store = new electronStore()
+      return store.get('theme') as Theme
+    })
+  }
+
+  mainWindow.webContents.openDevTools()
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
@@ -79,6 +129,28 @@ app.whenReady().then(() => {
 
   ipcMain.handle('license:get', (_, ...args: Parameters<GetLicenseKey>) =>
     handleGetLicenseKey(...args)
+  )
+
+  // trial
+  ipcMain.handle('trial:start', (_, ...args: Parameters<StartFreeTrial>) => startFreeTrial(...args))
+
+  ipcMain.handle('trial:check', (_, ...args: Parameters<CheckFreeTrial>) => checkFreeTrial(...args))
+
+  // app data
+  ipcMain.handle('settings:get', (_, ...args: Parameters<GetSettingsData>) =>
+    handleGetSettingsData(...args)
+  )
+
+  ipcMain.handle('settings:set', (_, ...args: Parameters<SetSettingsData>) =>
+    handleSetSettingsData(...args)
+  )
+
+  // data
+  ipcMain.handle('data:import', (_, ...args: Parameters<ImportAppData>) =>
+    importAppDataFunc(...args)
+  )
+  ipcMain.handle('data:export', (_, ...args: Parameters<ExportAppData>) =>
+    exportAppDataFunc(...args)
   )
 
   app.on('activate', function () {

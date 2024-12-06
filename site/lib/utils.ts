@@ -18,7 +18,7 @@ import {
 import { twMerge } from "tailwind-merge";
 
 export const font = Inter({ subsets: ["latin"] });
-export const font2 = Hanken_Grotesk({
+export const font2 = DM_Sans({
   subsets: ["latin"],
 });
 

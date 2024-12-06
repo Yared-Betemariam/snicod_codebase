@@ -16,7 +16,7 @@ const DownloadButton = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="my-2 outline-none">
         <Button className="h-10 text-base hover:opacity-80 gap-3 duration-300 transition-all button-gradient-bg w-58 px-4">
-          <span>Download Snicod 1.0</span> <Download className="size-5" />
+          <span>Download Snicod</span> <Download className="size-5" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-58 rounded p-0 py-2 bg-zinc-900 border-zinc-300/25 text-zinc-100">

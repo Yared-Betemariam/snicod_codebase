@@ -18,7 +18,7 @@
 
   html,
   body {
-    @apply h-full min-h-screen overflow-hidden antialiased bg-[#222222] text-zinc-100 text-[15px];
+    @apply h-full min-h-screen overflow-hidden antialiased bg-[#eee] dark:bg-[#222] text-neutral-950 dark:text-neutral-50 text-[15px];
     font-family:
       'Inter',
       system-ui,
@@ -38,6 +38,11 @@
     -webkit-app-region: drag;
   }
 
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
+
   ::-webkit-scrollbar {
     /* Customize the scrollbar width */
     @apply w-1.5  h-1 bg-transparent;
@@ -48,11 +53,27 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-zinc-700/30 hover:bg-zinc-700/75 rounded-md;
+    @apply bg-neutral-600/50 active:bg-neutral-600/75 rounded-md;
   }
 
   .border-color {
-    @apply border-zinc-700/75;
+    @apply border-neutral-300/75 dark:border-neutral-700/75;
+  }
+
+  .link-color {
+    @apply text-sky-600 dark:text-sky-400 cursor-pointer hover:opacity-80 duration-200 transition-all font-medium;
+  }
+
+  .error-color {
+    @apply dark:text-red-300/75 text-red-700/75;
+  }
+
+  .alert-color {
+    @apply dark:text-yellow-300/50 text-yellow-600;
+  }
+
+  .separator {
+    @apply border-neutral-500/20;
   }
 
   .nofocus {
@@ -75,5 +96,48 @@
     -moz-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
+  }
+
+  /* scrollbar */
+  .scrollhost {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scrollhost::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scroll-bar {
+    width: 10px;
+    height: 100%;
+    right: 0;
+    top: 0px;
+    position: absolute;
+    border-radius: 7px;
+    bottom: 0px;
+    background-color: rgba(255, 255, 255, 0.35);
+  }
+  .scrollhost-container {
+    position: relative;
+    height: 100%;
+  }
+
+  .scroll {
+    overflow-y: scroll;
+    mask-image: linear-gradient(to top, transparent, black),
+      linear-gradient(to left, transparent 8px, black 8px);
+    mask-size: 100% 20000px;
+    mask-position: left bottom;
+    -webkit-mask-image: linear-gradient(to top, transparent, black),
+      linear-gradient(to left, transparent 8px, black 8px);
+    -webkit-mask-size: 100% 20000px;
+    -webkit-mask-position: left bottom;
+    transition:
+      mask-position 0.3s,
+      -webkit-mask-position 0.3s;
+  }
+  .scroll:hover {
+    -webkit-mask-position: left top;
   }
 }

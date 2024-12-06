@@ -1,14 +1,17 @@
-import { useLicenseKey } from '@renderer/store/license'
-import { Loader2 } from 'lucide-react'
+import { useLicenseKey, useTrial } from '@renderer/store/license'
+import { ArrowRight, Loader, X } from 'lucide-react'
 import { useState } from 'react'
-import { BsExclamationTriangle } from 'react-icons/bs'
-import Button from '../ui/button'
+import { BsExclamationCircle, BsExclamationTriangle } from 'react-icons/bs'
+import Button, { OutlinedButton } from '../ui/button'
 import Input from '../ui/input'
 
 const LicensePage = () => {
-  const { activateLicenseKey } = useLicenseKey((state) => ({
-    activateLicenseKey: state.activateLicenseKey
+  const { activateLicenseKey, licensePageOpen, setLicensePageOpen } = useLicenseKey((state) => ({
+    activateLicenseKey: state.activateLicenseKey,
+    licensePageOpen: state.licensePageOpen,
+    setLicensePageOpen: state.setLicensePageOpen
   }))
+  const { startFreeTrial, trialData, freeTrialActive } = useTrial((state) => state)
   const [inputValue, setInputValue] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -17,7 +20,7 @@ const LicensePage = () => {
     setError('')
 
     if (inputValue === '') {
-      setError('License key cannot be empty')
+      setError("License key can't be empty!")
       setTimeout(() => {
         setError('')
       }, 3000)
@@ -26,18 +29,6 @@ const LicensePage = () => {
 
     try {
       setIsLoading(true)
-      // if (isActivated == false) {
-      //   deactivateLicenseKey(inputValue)
-      //     .then((data) => {
-      //       if (data.error) {
-      //         setError(data.errorMessage)
-      //       }
-      //     })
-      //     .catch((error) => {
-      //       console.log(error)
-      //     })
-      //     .finally(() => setIsLoading(false))
-      // } else {
       activateLicenseKey(inputValue)
         .then((data) => {
           if (data.error) {
@@ -48,8 +39,6 @@ const LicensePage = () => {
           console.log(error)
         })
         .finally(() => setIsLoading(false))
-      // }
-      // checkLicenseKey()
     } catch (error: unknown) {
       if (error instanceof Error) {
         setError(error.message)
@@ -59,40 +48,50 @@ const LicensePage = () => {
     }
   }
 
+  const handleFreeTrial = async () => {
+    try {
+      setIsLoading(true)
+      startFreeTrial()
+        .catch((error) => {
+          console.log(error)
+        })
+        .finally(() => setIsLoading(false))
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message)
+      } else {
+        setError('An unknown error occurred')
+      }
+    }
+  }
+
   return (
-    <div className="flex flex-col relative border-t border-color flex-1 gap-2 max-h-[calc(100vh-44px)] overflow-scroll">
-      {/* <span
-        onClick={() => {
-          setOpen(false)
-        }}
-        className="p-1 hover:bg-zinc-700/25 rounded-md transition-all duration-100 absolute top-4 right-4"
-      >
-        <X className="size-5" />
-      </span> */}
-      <div className="max-w-[44rem] mx-auto flex relative flex-col overflow-hidden pt-12 pb-4 px-8 gap-2 justify-center">
-        <span className="text-2xl font-medium">Activate License</span>
-        <div className="flex text-zinc-400 text-sm leading-[1.4] flex-col mb-4 gap-2">
-          {/* <p>
-            You can purchase a license key for our official website{' '}
-            <span className="text-primary underline cursor-pointer hover:brightness-125">
-              snicod.pro
-            </span>
-            , then copy the license key below and click activate to start using snicod
-          </p> */}
+    <div className="flex flex-col relative border-t-0 border-color flex-1 gap-2 max-h-[calc(100vh-44px)] bg-[#feffe] dark:bg-[#1d1dd]">
+      {licensePageOpen && freeTrialActive && (
+        <span
+          className="size-10 grid place-content-center absolute top-6 right-6 hover:bg-zinc-200 z-50 rounded dark:hover:bg-zinc-800"
+          onClick={() => setLicensePageOpen(false)}
+        >
+          <X className="size-5" />
+        </span>
+      )}
+      <span className="bg-gradient-to-tr from-neutral-400/15 dark:from-neutral-700/15 border-l border-neutral-400/50 dark:border-neutral-700/50 to-transparent size-[100vh] absolute top-0 left-1/2 rounded-full" />
+      <div className=" flex flex-col z-10 max-w-[26.5rem] mx-auto my-auto gap-4">
+        <span className="text-[2.75rem] leading-[1.1] font-bold tracking-tighter">
+          Activate your License
+        </span>
+        <div className="flex text-sm leading-[1.4] flex-col gap-2">
           <p>
             You can purchase a license key for our official website{' '}
-            <span className="text-primary underline cursor-pointer hover:brightness-125">
-              snicod.pro
+            <span onClick={() => window.app.openAppWebsite()} className="link-color underline">
+              https://snicod.pro
             </span>
-            . You will need to have an internet connection the first time you open it to activate
-            your license.
+            .You will need to have an internet connection to activate your license.
           </p>
         </div>
-      </div>
-      <div className=" w-full bg-zinc-950/15 h-full flex">
-        <div className=" max-w-[44rem] mx-auto z-10 flex flex-col w-full px-8 py-4 gap-2 ">
+        <div className="flex flex-col gap-2">
           <div className="flex flex-col gap-1 mb-1">
-            <label htmlFor="" className="text-zinc-500 text-xs uppercase">
+            <label htmlFor="" className="text-neutral-600 dark:text-neutral-500 text-xs uppercase">
               License Key
             </label>
             <Input
@@ -102,93 +101,36 @@ const LicensePage = () => {
               className="h-[32px]"
               onChange={(e) => setInputValue(e.target.value)}
             />
+            {error && (
+              <span className="text-sm duration-300 transition-all flex items-center error-color">
+                <BsExclamationTriangle className="inline size-3.5 mr-1.5" />
+                {error}
+              </span>
+            )}
           </div>
-          {/* <div className="flex items-center gap-2 mb-1">
-            <label htmlFor="" className="text-zinc-500 text-xs uppercase">
-              Status:
-            </label>
-            <span
-              className={cn(
-                'text-sm font-light',
-                isActivated ? ' text-emerald-300' : 'text-red-300'
-              )}
-            >
-              {isActivated ? 'ACTIVE' : 'INACTIVE'}
-            </span>
-          </div> */}
-          {error && (
-            <p className="flex gap-2 items-center bg-red-700/25 text-red-300 mb-2 text-sm rounded-md px-2.5 py-1.5">
-              <BsExclamationTriangle className="size-4" /> <span>{error}</span>
-            </p>
-          )}
           <Button
             onClick={handleActivateDeactivate}
             disabled={isLoading}
-            className="bg-primary h-[32px] duration-200 transition-all hover:bg-primary/90 mt-auto"
+            className="bg-primary dark:bg-primary h-[34px] duration-200 transition-all dark:hover:bg-primary/90 hover:bg-primary/90 mt-auto"
           >
-            {isLoading && <Loader2 className="size-4 animate-spin" />}
-            {/* <span>{isActivated ? 'Deactivate' : 'Activate'}</span> */}
+            {isLoading && <Loader className="size-4 animate-spin" />}
             <span>Activate</span>
           </Button>
+          {!trialData && freeTrialActive !== false && (
+            <OutlinedButton onClick={handleFreeTrial} disabled={isLoading} className="relative h-8">
+              <span>Start Free Trial</span>
+              <ArrowRight className="size-4 mr-2 inline absolute top-1/2 -translate-y-1/2 right-1 opacity-50" />
+            </OutlinedButton>
+          )}
+          {freeTrialActive === false && (
+            <span className="text-sm duration-300 transition-all flex items-center alert-color">
+              <BsExclamationCircle className="inline size-3.5 mr-1.5" />
+              Free trial ended, purchase licence to contiune
+            </span>
+          )}
         </div>
       </div>
     </div>
   )
-  // return (
-  //   <div className="flex relative flex-1 flex-col gap-4">
-  //     <div className="h-[54px] w-full flex">
-  //       <div className=" mx-auto max-w-[34rem] px-6 w-full flex justify-between items-end">
-  //         <span className="text-[22px] h-full font-medium relative flex items-end">
-  //           Activate License
-  //         </span>
-  //       </div>
-  //     </div>
-  //     <div className="flex flex-col gap-2 max-w-[34rem] w-full px-6 mx-auto z-10 flex-1 pb-12">
-  //       <div className="flex text-zinc-300 text-sm leading-[1.4] flex-col mb-4 gap-2">
-  //         <p>
-  //           You can purchase a license key for our official website{' '}
-  //           <span className="text-primary underline cursor-pointer hover:brightness-125">
-  //             snicod.pro
-  //           </span>
-  //           , then copy the license key below and click activate to start using snicod
-  //         </p>
-  //         <p>
-  //           You will need to have an internet connection the first time you open it to activate your
-  //           license. Contact our support team if you run into any problem
-  //         </p>
-  //       </div>
-  //       <div className="flex flex-col gap-1 mb-1">
-  //         <label htmlFor="" className="text-zinc-500 text-xs uppercase">
-  //           License Key
-  //         </label>
-  //         <Input
-  //           autoFocus
-  //           onClear={() => setInputValue('')}
-  //           value={inputValue}
-  //           className="h-[32px]"
-  //           onChange={(e) => setInputValue(e.target.value)}
-  //         />
-  //       </div>
-  //       {error && (
-  //         <p className="flex gap-2 items-center bg-red-700/25 text-red-300 text-sm rounded-md px-2.5 py-1.5">
-  //           <BsExclamationTriangle className="size-4" /> <span>{error}</span>
-  //         </p>
-  //       )}
-  //       <Button
-  //         onClick={handleActivate}
-  //         disabled={isLoading}
-  //         className="bg-primary h-[32px] duration-200 transition-all hover:bg-primary/90 mt-auto"
-  //       >
-  //         {isLoading && <Loader className="size-4 animate-spin" />}
-  //         <span>Activate</span>
-  //       </Button>
-  //     </div>
-  //     <img
-  //       src={logoIcon}
-  //       alt="icon"
-  //       className=" h-[100%] mb-2 opacity-[0.01] absolute inset-y-0 right-0 undragable"
-  //     />
-  //   </div>
-  // )
 }
 export default LicensePage

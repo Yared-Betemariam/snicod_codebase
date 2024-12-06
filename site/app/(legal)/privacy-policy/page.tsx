@@ -28,7 +28,7 @@ const page = () => {
       <h2>1. Data Collection and Use</h2>
       <p>
         Snicod is a code snippet management tool that you can download by
-        purchasing a license.
+        purchasing a license.{" "}
         <strong>
           All the data you save within Snicod, including code snippets, is
           stored locally on your device.
@@ -54,7 +54,8 @@ const page = () => {
         </li>
         <li>
           <strong>License Activation:</strong> Once purchased, your license key
-          will be used to activate the app locally on your computer.
+          will be used to activate the app locally on your computer. (Internet
+          connection is required to activate it)
         </li>
       </ul>
 
@@ -69,8 +70,12 @@ const page = () => {
       <p>
         Snicod is a desktop application and operates offline, so it does not use
         cookies or any tracking technologies within the app itself. However, our
-        website, <Link href={websiteLink}>{websiteLink}</Link>, may use cookies
-        for purposes like processing purchases or analyzing website traffic.
+        website,{" "}
+        <Link href={websiteLink} className="underline">
+          {websiteLink}
+        </Link>
+        , may use cookies for purposes like processing purchases or analyzing
+        website traffic.
       </p>
 
       <h2>4. Third-Party Services</h2>
@@ -81,8 +86,12 @@ const page = () => {
       </p>
       <ul>
         <li>
-          <Link target="_blank" href="https://gumroad.com/">
-            <strong>Gumroad, Inc</strong>
+          <Link
+            target="_blank"
+            className="underline"
+            href="https://gumroad.com/"
+          >
+            <strong>Lemon Squeezy, Inc</strong>
           </Link>{" "}
           – used to process payments and ensure secure transactions.
         </li>
@@ -113,7 +122,11 @@ const page = () => {
       <h2>8. Contact Us</h2>
       <p>
         If you have any questions about this Privacy Policy or Snicod’s
-        practices, please contact us at {websiteMail}.
+        practices, please contact us at{" "}
+        <Link href={`mailto:${websiteMail}`} className="underline">
+          {websiteMail}
+        </Link>
+        .
       </p>
     </div>
   );

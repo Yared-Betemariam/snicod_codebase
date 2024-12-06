@@ -1,49 +1,53 @@
-import { useSidebar, useSnippets } from '@renderer/store'
-import { useLicenseKey } from '@renderer/store/license'
+import { useSettings, useSidebar, useSnippets } from '@renderer/store'
+import { useLicenseKey, useTrial } from '@renderer/store/license'
+import { updateSettingsData } from '@renderer/utils'
 import { useEffect } from 'react'
 import Sidebar from '../app/sidebar'
 import Frame from '../Frame'
 import LicensePage from './license'
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
-  const { sidebarOpen, setSidebarOpen, setSidebarWidth } = useSidebar((state) => ({
-    sidebarOpen: state.sidebarOpen,
-    setSidebarOpen: state.setSidebarOpen,
-    setSidebarWidth: state.setSidebarWidth
+  const { sidebarOpen } = useSidebar((state) => ({
+    sidebarOpen: state.sidebarOpen
   }))
-  const { isActivated: isActivated, checkLicenseKey } = useLicenseKey((state) => ({
+
+  const {
+    isActivated: isActivated,
+    checkLicenseKey,
+    licensePageOpen
+  } = useLicenseKey((state) => ({
     isActivated: state.isActivated,
-    checkLicenseKey: state.checkLicenseKey
+    checkLicenseKey: state.checkLicenseKey,
+    licensePageOpen: state.licensePageOpen
   }))
+
+  const { freeTrialActive, checkFreeTrial } = useTrial((state) => ({
+    freeTrialActive: state.freeTrialActive,
+    checkFreeTrial: state.checkFreeTrial
+  }))
+
+  const isActivatedx = false
 
   useEffect(() => {
-    checkLicenseKey()
-    useSnippets.getState().loadSnippets()
-
-    const sidebarOpenStorage = localStorage.getItem('sidebarOpen')
-    if (sidebarOpenStorage) {
-      setSidebarOpen(JSON.parse(sidebarOpenStorage))
+    const initializeApp = async () => {
+      await useSettings.getState().loadTheme()
+      await updateSettingsData()
+      await checkFreeTrial()
+      await checkLicenseKey()
+      await useSnippets.getState().loadSnippets()
     }
 
-    const sidebarWidthStorage = localStorage.getItem('sidebarWidth')
-    if (sidebarWidthStorage) {
-      setSidebarWidth(JSON.parse(sidebarWidthStorage))
-    }
+    initializeApp()
   }, [])
 
+  const canAccessApp = (isActivated !== undefined && isActivated) || freeTrialActive
   return (
-    <main className="h-full flex flex-col">
-      <Frame licenseKeyActive={isActivated} />
-      <div className="flex w-full flex-1">
+    <main className="h-full flex flex-1">
+      {sidebarOpen && canAccessApp && !licensePageOpen && <Sidebar />}
+      <div className="flex flex-col w-full flex-1">
+        <Frame licenseKeyActive={canAccessApp && !licensePageOpen} />
         {isActivated !== undefined &&
-          (isActivated ? (
-            <>
-              {sidebarOpen && <Sidebar />}
-              {children}
-            </>
-          ) : (
-            <LicensePage />
-          ))}
+          (canAccessApp && !licensePageOpen ? <>{children}</> : <LicensePage />)}
       </div>
     </main>
   )

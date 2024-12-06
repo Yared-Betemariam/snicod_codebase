@@ -86,23 +86,27 @@
   }
 
   body {
-    @apply bg-zinc-100/75 text-zinc-900 flex flex-col relative overflow-x-hidden min-h-screen;
+    @apply bg-zinc-100 text-zinc-900 flex flex-col relative overflow-x-hidden min-h-screen;
   }
 
   .wrapper {
-    @apply max-w-screen-xl w-full mx-auto px-6;
+    @apply max-w-screen-xl w-full mx-auto px-6 md:px-8;
+  }
+
+  .h1 {
+    @apply text-4xl xs:text-5xl lg:text-[3.25rem] tracking-[-0.025em] font-extrabold max-w-[16ch] capitalize;
   }
 
   .h2 {
-    @apply text-4xl md:text-[3.5rem] font-black capitalize;
+    @apply text-4xl md:text-5xl md:leading-[1.1] tracking-[-0.025em] font-black capitalize;
   }
 
   .h3 {
-    @apply text-4xl md:text-5xl font-extrabold;
+    @apply text-3xl sm:text-4xl md:text-[2.5rem] tracking-[-0.025em] md:leading-[1.6] font-extrabold;
   }
 
   .h4 {
-    @apply text-2xl md:text-3xl  font-extrabold;
+    @apply text-2xl md:text-3xl  font-extrabold tracking-[-0.025em];
   }
 
   .body {
@@ -110,12 +114,12 @@
   }
 
   .border-color {
-    /* @apply border-zinc-500/25; */
-    @apply border-zinc-100/0;
+    @apply border-zinc-500/25;
+    /* @apply border-zinc-100/25; */
   }
   .border-color-2 {
-    /* @apply border-zinc-400/25; */
-    @apply border-zinc-100/0;
+    @apply border-zinc-400/25;
+    /* @apply border-zinc-100/25; */
   }
 
   .dsb {
@@ -132,19 +136,6 @@
 
   .pattern {
     @apply bg-pattern bg-repeat bg-center -z-50;
-  }
-
-  /* scroll */
-  ::-webkit-scrollbar {
-    @apply w-[7px] h-[7px];
-  }
-
-  ::-webkit-scrollbar-track {
-    @apply bg-transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    @apply rounded-full bg-gray-700;
   }
 
   /* legal */
@@ -182,8 +173,10 @@
   }
 
   .mask-image {
-    mask: linear-gradient(to top, transparent 43%, white 82%);
-    -webkit-mask: linear-gradient(to top, transparent 43%, white 82%);
+    mask: linear-gradient(to top, transparent 10%, #f4f4f5 75%);
+    -webkit-mask: linear-gradient(to top, transparent 10%, #f4f4f5 75%);
+    /* mask: linear-gradient(to top, transparent 42%, #f4f4f5 80%);
+    -webkit-mask: linear-gradient(to top, transparent 42%, #f4f4f5 80%); */
   }
 
   .glow {
@@ -197,5 +190,18 @@
 
   .highlight {
     @apply text-primary brightness-[.65] underline underline-offset-[6px] decoration-primary/10;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r brightness-[0.85] from-primary to-sky-900 bg-clip-text text-transparent;
+  }
+
+  .hero-gradient {
+    @apply bg-gradient-to-l from-primary to-emerald-500;
+    /* background-image: linear-gradient(
+      90deg,
+      #0890b200,
+      #0891b2,
+       #0890b200 100%*/
   }
 }

@@ -1,5 +1,14 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
-import { GetLicenseKey, SetLicenseKey } from '@shared/index'
+import {
+  CheckFreeTrial,
+  GetLicenseKey,
+  GetSettingsData,
+  ImportAppData,
+  SetLicenseKey,
+  SetSettingsData,
+  StartFreeTrial,
+  Theme
+} from '@shared/index'
 
 declare global {
   interface Window {
@@ -10,8 +19,17 @@ declare global {
     }
     app: {
       openHelpWindow: () => void
+      openAppWebsite: () => void
+      toggleDarkMode: (value: Theme) => boolean
+      getCurrentTheme: () => Theme
       setLicenseKey: SetLicenseKey
       getLicenseKey: GetLicenseKey
+      checkFreeTrial: CheckFreeTrial
+      startFreeTrial: StartFreeTrial
+      importAppData: ImportAppData
+      importAppData: ImportAppData
+      getSettingsData: GetSettingsData
+      setSettingsData: SetSettingsData
     }
   }
 }
